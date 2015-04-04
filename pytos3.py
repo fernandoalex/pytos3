@@ -32,7 +32,7 @@ def put_in_bucket(file):
 
     #Create a key to word with s3
     s3_key = Key(conn.get_bucket('pytos3-backup'))
-    s3_key.key = ('teste.txt')
+    s3_key.key = (file)
     s3_key.set_contents_from_filename(file_path)
 
 def main():
