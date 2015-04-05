@@ -5,7 +5,6 @@ import sys
 import os
 import ConfigParser
 import math
-#from filechunkio import FileChunkIO
 
 #Import boto
 import boto
@@ -26,7 +25,6 @@ def load_conf(conf_file):
 
     return parameters
 
-#def put_in_bucket(full_file_path, name_of_file_s3, s3_bucket_name):
 def put_in_bucket(full_file_path, s3_bucket_name):
     parameters = load_conf("/pytos3.conf")
 
@@ -36,6 +34,7 @@ def put_in_bucket(full_file_path, s3_bucket_name):
     # What's the file size
     file_size = os.stat(full_file_path).st_size
 
+    #Initiate file upload
     multi_part_upload = conn_bucket.initiate_multipart_upload(os.path.basename(full_file_path))
 
     #chunk size in MB needs to be => than 10MB
@@ -53,18 +52,19 @@ def put_in_bucket(full_file_path, s3_bucket_name):
         #how many bytes to upload this time chunk_size or less than that
         bytes = min(chunk_size, file_size - offset)
 
-        #with FileChunkIO(full_file_path, 'r', offset = offset, bytes = bytes) as fp:
         #https://github.com/piotrbulinski/boto/commit/c3b81eb115e469b9df1ff8c379d3208327da2c84
         with open(full_file_path, 'rb') as fp:
             fp.seek(offset)
+
+            # part_num needs to be > 1
             multi_part_upload.upload_part_from_file(fp, part_num = i + 1, size = bytes)
 
+    # Terminate multipart upload so the part can be deleted and we save some money
     multi_part_upload.complete_upload()
 
 def main():
 
     put_in_bucket(sys.argv[1], sys.argv[2])
-    #put_in_bucket(sys.argv[1], sys.argv[2], sys.argv[3])
 
 if __name__ == "__main__":
     main()
