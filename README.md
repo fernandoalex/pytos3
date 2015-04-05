@@ -5,4 +5,5 @@
 - Set parameters to get filename and bucket name
 
 ### Needed:
-boto
+- boto
+- filechunkio

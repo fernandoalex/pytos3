@@ -5,7 +5,7 @@ import sys
 import os
 import ConfigParser
 import math
-from filechunkio import FileChunkIO
+#from filechunkio import FileChunkIO
 
 #Import boto
 import boto
@@ -53,8 +53,11 @@ def put_in_bucket(full_file_path, s3_bucket_name):
         #how many bytes to upload this time chunk_size or less than that
         bytes = min(chunk_size, file_size - offset)
 
-        with FileChunkIO(full_file_path, 'r', offset = offset, bytes = bytes) as fp:
-            multi_part_upload.upload_part_from_file(fp, part_num = i + 1)
+        #with FileChunkIO(full_file_path, 'r', offset = offset, bytes = bytes) as fp:
+        #https://github.com/piotrbulinski/boto/commit/c3b81eb115e469b9df1ff8c379d3208327da2c84
+        with open(full_file_path, 'rb') as fp:
+            fp.seek(offset)
+            multi_part_upload.upload_part_from_file(fp, part_num = i + 1, size = bytes)
 
     multi_part_upload.complete_upload()
 
